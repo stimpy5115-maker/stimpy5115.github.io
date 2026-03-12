@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Turtle</title>
+</head>
+
+<header>
+    <h1>In this project, I used turtle graphics to create a visual scene.</h1>
+</header>
+
+<img src="Screenshot 2026-01-21 at 2.24.28 PM.png" alt="Turtle Graphics Image" height="400" width="400">
+
+<section>
+    <h2>Code</h2>
+    <p>Here is the code I used to create the image above:</p>
+    <pre><code>
+#Brian Stimson - Project 2, Drawing an Ocean Scene using user-defined functions
+
+from turtle import *
+import turtle
+import math
+
+def setup_turtle():
+    #Setting up the turtle
+    t=turtle.Turtle()
+    t.speed(5)
+    t.pensize(3)
+    screen = turtle.Screen()
+    screen.title("Ocean Scene")
+    screen.bgcolor("lightblue")
+    return t, screen
+
+def jump_to(t, x, y):
+    #Sets up the jump_to function allowing for easy movement between drawings
+    t.penup()
+    t.goto(x, y)
+    t.pendown()
+
+def draw_circle(t, radius, fill_color=None):
+    #Drawing a circle with optional fill color
+    if fill_color:
+        t.fillcolor(fill_color)
+        t.begin_fill()
+    t.circle(radius)
+    if fill_color:
+        t.end_fill()
+    t.hideturtle()
+
+def draw_sun():
+    #Drawing the sun using a circle
+    t=turtle.Turtle()
+    jump_to(t, x=200, y=200)
+    draw_circle(t, 50, fill_color="yellow")
+
+def draw_ocean(height=500, width=800, fill_color="DarkSlateGray4"):
+
+    #Drawing the ocean using a rectangle
+    t=turtle.Turtle()
+    jump_to(t, x=-400, y=100)
+    t.color("DarkSlateGray4")
+    if fill_color:
+        t.fillcolor(fill_color)
+        t.begin_fill()
+    for _ in range(2):
+        t.forward(width)
+        t.right(90)
+        t.forward(height)
+        t.right(90)
+    if fill_color:
+        t.end_fill()
+        t.hideturtle()
+    
+def draw_fish(side = 20, fill_color="chartreuse2"):
+        
+    #Drawing the fish's tail using a triangle
+    t=turtle.Turtle() 
+    t.color("chartreuse2")
+    jump_to(t, x=100, y=-100)
+    t.setheading(90)
+     
+    if fill_color:
+        t.fillcolor(fill_color)
+        t.begin_fill()
+    for _ in range(3):
+        t.forward(side)
+        t.left(120)
+
+    if fill_color:
+        t.end_fill()
+        t.hideturtle()
+
+    #Drawing the fish's body using an oval
+    jump_to(t, x=90, y=-85)
+    t.setheading(135)
+    t.color("chartreuse2")
+    
+    if fill_color:
+        t.fillcolor(fill_color)
+        t.begin_fill()
+    for _ in range(2):
+        t.circle(side,90)
+        t.circle(side/2,90)
+    if fill_color:
+        t.end_fill()
+        t.hideturtle()
+
+def draw_bubbles(radius = 10, fill_color="CadetBlue1"):
+    #Drawing bubbles near the fish using circles
+    t=turtle.Turtle()
+    jump_to(t, x=50, y=-70)
+    draw_circle(t, 10, fill_color="CadetBlue1")
+    
+    #Second bubble with smaller radius
+    jump_to(t, x=60, y=-40)
+    t.color("CadetBlue1")
+    if fill_color:
+        t.fillcolor(fill_color)
+        t.begin_fill()
+    t.circle(radius=7)
+    if fill_color:
+        t.end_fill()
+    t.hideturtle()
+
+def draw_seaweed(length = 400, curve_factor = 25, segments = 50,):
+    #Drawing seaweed by using curves
+    t=turtle.Turtle()
+    jump_to(t, x=-200, y=-375)
+    t.color("PaleGreen3")
+    t.pensize(20)
+    for i in range(segments):
+        angle = curve_factor * math.sin(math.pi * i / segments)
+        t.right(angle)
+        t.forward(length / segments)
+        t.left(angle)
+        t.setheading(90)
+    t.hideturtle()
+
+def draw_scene(t):
+    #Catalyst for drawing the entire scene by calling all functions
+    setup_turtle()
+    draw_sun()
+    draw_ocean()
+    draw_fish()
+    draw_bubbles()
+    draw_seaweed()
+
+def main():
+    #Starts creation upon running the program
+    t, screen = setup_turtle()
+    draw_scene(t)
+    screen.mainloop()
+
+if __name__ == "__main__":
+    main()
+    
+done()
+</code></pre>
+
+</section>

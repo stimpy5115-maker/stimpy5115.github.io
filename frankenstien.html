@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Text Analysis</title>
+</head>
+
+<header>
+    <h1>In this project, I analyzed the word counts in the classic novel Frankenstein.</h1>
+</header>
+
+<section>
+    <h2> My Findings</h2>
+    <p>Here are the most commonly used words in the first few paragraphs of the novel:</p>
+    <img src="Screenshot 2026-02-11 at 4.49.28 PM.png" alt="Word Count Visualization">
+
+    <p>And here are the most commonly used adjectives:</p>
+    <img src="Screenshot 2026-02-11 at 4.49.21 PM.png" alt="Adjective Count Visualization">
+</section>
+
+<section>
+    <h2>Code</h2>
+    <p>Here is the code I used to analyze the word counts:</p>
+    <pre><code>
+import spacy
+import operator
+
+spacy.cli.download("en_core_web_sm")
+nlp = spacy.load("en_core_web_sm")
+
+"""
+This text comes from the novel "Frankenstein" by Mary Shelley. I chose this text because I recently watched the new movie and it is fresh in my mind.
+"""
+
+my_text = """
+[I am by birth a Genevese, and my family is one of the most
+distinguished of that republic. My ancestors had been for many years
+counsellors and syndics, and my father had filled several public
+situations with honour and reputation. He was respected by all who
+knew him for his integrity and indefatigable attention to public
+business. He passed his younger days perpetually occupied by the
+affairs of his country; a variety of circumstances had prevented his
+marrying early, nor was it until the decline of life that he became a
+husband and the father of a family.
+
+As the circumstances of his marriage illustrate his character, I cannot
+refrain from relating them. One of his most intimate friends was a
+merchant who, from a flourishing state, fell, through numerous
+mischances, into poverty. This man, whose name was Beaufort, was of a
+proud and unbending disposition and could not bear to live in poverty
+and oblivion in the same country where he had formerly been
+distinguished for his rank and magnificence. Having paid his debts,
+therefore, in the most honourable manner, he retreated with his
+daughter to the town of Lucerne, where he lived unknown and in
+wretchedness. My father loved Beaufort with the truest friendship and
+was deeply grieved by his retreat in these unfortunate circumstances.
+He bitterly deplored the false pride which led his friend to a conduct
+so little worthy of the affection that united them. He lost no time in
+endeavouring to seek him out, with the hope of persuading him to begin
+the world again through his credit and assistance.
+
+Beaufort had taken effectual measures to conceal himself, and it was ten
+months before my father discovered his abode. Overjoyed at this discovery,
+he hastened to the house, which was situated in a mean street near the
+Reuss. But when he entered, misery and despair alone welcomed him. Beaufort
+had saved but a very small sum of money from the wreck of his fortunes, but
+it was sufficient to provide him with sustenance for some months, and in
+the meantime he hoped to procure some respectable employment in a
+merchant’s house. The interval was, consequently, spent in inaction;
+his grief only became more deep and rankling when he had leisure for
+reflection, and at length it took so fast hold of his mind that at the end
+of three months he lay on a bed of sickness, incapable of any exertion.
+
+His daughter attended him with the greatest tenderness, but she saw
+with despair that their little fund was rapidly decreasing and that
+there was no other prospect of support. But Caroline Beaufort
+possessed a mind of an uncommon mould, and her courage rose to support
+her in her adversity. She procured plain work; she plaited straw and
+by various means contrived to earn a pittance scarcely sufficient to
+support life.
+
+Several months passed in this manner. Her father grew worse; her time
+was more entirely occupied in attending him; her means of subsistence
+decreased; and in the tenth month her father died in her arms, leaving
+her an orphan and a beggar. This last blow overcame her, and she knelt
+by Beaufort’s coffin weeping bitterly, when my father entered the
+chamber. He came like a protecting spirit to the poor girl, who
+committed herself to his care; and after the interment of his friend he
+conducted her to Geneva and placed her under the protection of a
+relation. Two years after this event Caroline became his wife.
+
+There was a considerable difference between the ages of my parents, but
+this circumstance seemed to unite them only closer in bonds of devoted
+affection. There was a sense of justice in my father’s upright mind
+which rendered it necessary that he should approve highly to love
+strongly. Perhaps during former years he had suffered from the
+late-discovered unworthiness of one beloved and so was disposed to set
+a greater value on tried worth. There was a show of gratitude and
+worship in his attachment to my mother, differing wholly from the
+doting fondness of age, for it was inspired by reverence for her
+virtues and a desire to be the means of, in some degree, recompensing
+her for the sorrows she had endured, but which gave inexpressible grace
+to his behaviour to her. Everything was made to yield to her wishes
+and her convenience. He strove to shelter her, as a fair exotic is
+sheltered by the gardener, from every rougher wind and to surround her
+with all that could tend to excite pleasurable emotion in her soft and
+benevolent mind. Her health, and even the tranquillity of her hitherto
+constant spirit, had been shaken by what she had gone through. During
+the two years that had elapsed previous to their marriage my father had
+gradually relinquished all his public functions; and immediately after
+their union they sought the pleasant climate of Italy, and the change
+of scene and interest attendant on a tour through that land of wonders,
+as a restorative for her weakened frame.
+
+From Italy they visited Germany and France. I, their eldest child, was born
+at Naples, and as an infant accompanied them in their rambles. I remained
+for several years their only child. Much as they were attached to each
+other, they seemed to draw inexhaustible stores of affection from a very
+mine of love to bestow them upon me. My mother’s tender caresses and
+my father’s smile of benevolent pleasure while regarding me are my
+first recollections. I was their plaything and their idol, and something
+better—their child, the innocent and helpless creature bestowed on
+them by Heaven, whom to bring up to good, and whose future lot it was in
+their hands to direct to happiness or misery, according as they fulfilled
+their duties towards me. With this deep consciousness of what they owed
+towards the being to which they had given life, added to the active spirit
+of tenderness that animated both, it may be imagined that while during
+every hour of my infant life I received a lesson of patience, of charity,
+and of self-control, I was so guided by a silken cord that all seemed but
+one train of enjoyment to me.]
+"""
+
+# Normalizing text into lowercase and lemmatizing words, removing stop words, punctuation and numbers for easy counting
+
+def word_tokenization_normalization(text):
+
+    text = text.lower() # lowercase
+    doc = nlp(text)     # loading text into model
+
+    words_normalized = []
+    for word in doc:
+        if word.text != '\n' \
+        and not word.is_stop \
+        and not word.is_punct \
+        and not word.like_num \
+        and len(word.text.strip()) > 2:
+            word_lemmatized = str(word.lemma_)
+            words_normalized.append(word_lemmatized)
+
+    return words_normalized
+
+# Returns a list of words in the text and how often they appear
+
+def word_count(word_list):
+    word_counts = {}
+    for word in word_list:
+      word = word.lower()
+      if word in word_counts:
+        word_counts[word] += 1
+      else:
+        word_counts[word] = 1
+    return word_counts
+
+# Prints a list of the top 15 most frequently used words in the text and how often they appear
+
+def print_top_15_frequent_words(word_counts):
+    sorted_word_counts = dict(sorted(word_counts.items(), key=operator.itemgetter(1), reverse=True))
+    top_15_words = list(sorted_word_counts.items())[:15]  # Get the top 15 words and counts
+    for word, count in top_15_words:
+        print(f"{word}: {count}")
+
+def print_top_10_frequent_adjectives(word_counts):
+
+    adjectives = {word: count for word, count in word_counts.items() if nlp(word)[0].pos_ == "ADJ"}
+    sorted_adjectives = dict(sorted(adjectives.items(), key=operator.itemgetter(1), reverse=True))
+    top_10_adjectives = list(sorted_adjectives.items())[:10]
+    for word, count in top_10_adjectives:
+        print(f"{word}: {count}")
+
+adjectives = []
+for t in nlp(my_text):
+    if t.pos_ in {"ADJ"}:
+        adjectives.append(t.text.lower())
+
+print(f"Total adjectives: {len(adjectives)}")
+
+print("\nShowing top 10:\n")
+for t in adjectives[:10]:
+    print(t)
+
+doc_tokenized = word_tokenization_normalization(my_text)
+
+print(doc_tokenized)
+
+new_counts = word_count(doc_tokenized)
+print(new_counts)
+
+print_top_15_frequent_words(new_counts)
+
+print_top_10_frequent_adjectives(new_counts)
+
+"""
+The top 15 most frequently used words in the text after normalization are: father, beaufort, year, month, circumstance, life, mean, mind, public, friend, love, 
+affection, support, spirit and child. These words are relevant to themes of family and care which are prevalent in the first chapter of the novel. It's suprising
+a word such as circumstance in the top 15, as it is not usually a common word, but in this context, it is essential to describing the setting of the story.
+One can infer about the text that the first chapter is about family and the main character's relationship with friends and family. This is apparent in the use
+of words such as love, affection and support. The words do not quite reveal the subject or tone of the text, as most of what we perceive about the novel is
+developed in later chapters. Word frequency analysis capture the energy of the text by providing us with the most commonly used words.
+"""
+
+"""
+I chose to analyze the top 10 most frequently used adjectives in the text because it can provide insight into how the main character
+percieves their surroundings. I found that the most frequently used adjectives are: distinguished, many, several, public, indefatigable, younger, intimate,
+flourishing, and numerous. These words help define what's going on in the text.
+"""
+    </code></pre>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Word Processing</title>
+
+<h1>In this project, I normalized and sorted through text data so that it could be easily analyzed.</h1>
+    <p>My Code</p>
+    <p>Here is the code I used to process the text data:</p>
+    <pre><code>
+
+"""
+Text Processing and Word Frequency Analysis
+
+Original file is located at
+    https://colab.research.google.com/drive/1FProNdsZ1wprFuOkvgnEu-k1PObyHbfj
+
+
+We will fetch the first two chapters of Jane Austen's Pride and Prejudice from [Project Gutenberg](https://www.gutenberg.org/ebooks/1342)
+"""
+
+import operator
+
+#This function will retrieve the raw text from the URL given. It will also import several libraries to help with the process.
+#The function's parameters include the address of the information we want to retrieve. There is also the parents and exist_ok parameters which
+#will both help retrieve the information by checking if it exists and creating cache directories if needed.
+def fetch_text(raw_url):
+  import requests
+  from pathlib import Path
+  import hashlib
+
+  CACHE_DIR = Path("cs_110_content/text_cache")
+  CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+  def _url_to_filename(url):
+    url_hash = hashlib.sha1(url.encode("utf-8")).hexdigest()[:12]
+    return CACHE_DIR / f"{url_hash}.txt"
+
+  cache_path = _url_to_filename(raw_url)
+
+  SUCCESS_MSG = "✅ Text fetched."
+  FAILURE_MSG = "❌ Failed to fetch text."
+  try:
+    if not cache_path.exists():
+      response = requests.get(raw_url, timeout=10)
+      response.raise_for_status()
+      text_data = response.text
+      cache_path.write_text(text_data, encoding="utf-8")
+    print(SUCCESS_MSG)
+    return cache_path.read_text(encoding="utf-8")
+
+  except Exception as e:
+    print(FAILURE_MSG)
+    print(f"Error: {e}")
+    return ""
+
+# Save the URL in a variable
+PRIDE_PREJUDICE_URL = "https://gist.githubusercontent.com/goodbadwolf/8514e63776c1e9717d844ea4ee407739/raw/fdc87a64fd18e6ddb01ce8d758f8f2de8d03e163/pride_prejudice_excerpt.txt"
+
+# Fetch the text
+pride_prejudice_text = fetch_text(PRIDE_PREJUDICE_URL)
+
+#This function will print statistics based on the text given.
+#It will print the number of characters, number of lines, and number of words in the provided text.
+#The parameters for this function will provide us with the statistics that we want to print. num_chars will give us the number of characters, 
+#num_lines will give us the number of lines, and num_words will give us the number of words in the text. Each of these parameters will return an integer value.
+#The splitlines() command will split the characters, words, and lines into seperate lists to improve readability.
+
+def print_text_stats(text):
+  num_chars = len(text)
+
+  lines = text.splitlines()
+  num_lines = len(lines)
+
+  num_words = 0
+  for line in lines:
+    words_in_line = line.split()
+    num_words_in_line = len(words_in_line)
+    num_words += num_words_in_line
+
+  print(f"Number of characters: {num_chars}")
+  print(f"Number of lines: {num_lines}")
+  print(f"Number of words: {num_words}")
+
+#This function will tally the amount of times a specific word appears in the text. 
+#This function includes else and if statements to add words to the word count if it has already appeared.
+#Furthermore, the function will again split the text into seperate lines to improve readability.
+#The return statement will give us the total for each word that appears in the text.
+def get_word_counts(text):
+  word_counts = {}
+  lines = text.splitlines()
+  for line in lines:
+    words = line.split()
+    for word in words:
+      word = word.lower()
+      if word in word_counts:
+        word_counts[word] += 1
+      else:
+        word_counts[word] = 1
+  return word_counts
+
+#This function will print a top 10 list of the most frequently used words in the text.
+#The function will also print the number of times each word in the top 10 list appears in the text provided.
+#The sorted_word_counts variable will sort the top 10 words in order of frequency.
+#The top_10_words variable will then create an organized list of the top 10 words and how many times they appear.
+def print_top_10_frequent_words(text):
+    word_counts = get_word_counts(text)
+    sorted_word_counts = dict(sorted(word_counts.items(), key=operator.itemgetter(1), reverse=True))
+    top_10_words = list(sorted_word_counts.items())[:10]  # Get the top 10 words and counts
+    for word, count in top_10_words:
+        print(f"{word}: {count}")
+
+
+# this is a test print
+print_text_stats(pride_prejudice_text)
+
+# get the word counts
+word_counts = get_word_counts(pride_prejudice_text)
+print(word_counts)
+
+# print the top 10 frequent words
+print_top_10_frequent_words(pride_prejudice_text)
+
+"""
+
+Using spaCy for advanced text processing
+
+"""
+
+import spacy
+
+nlp = spacy.load('en_core_web_sm')
+
+#This function will sort through the words in the text provide and will only select words that are important. It will ignore numbers, stop words and punctuation.
+#The text.lower() command will make all words lowercase, as the sorting algorithm is case sensitive.
+#The return statement will return words that are important, and it will not return punctuation, numbers, or stop words.
+#The function will also utilize lemmatization to reduce words to their base form to improve the accuracy of the word count.
+def word_tokenization_normalization(text):
+
+    text = text.lower() # lowercase
+    doc = nlp(text)     # loading text into model
+
+    words_normalized = []
+    for word in doc:
+        if word.text != '\n' \
+        and not word.is_stop \
+        and not word.is_punct \
+        and not word.like_num \
+        and len(word.text.strip()) > 2:
+            word_lemmatized = str(word.lemma_)
+            words_normalized.append(word_lemmatized)
+
+    return words_normalized
+
+#This function will count the number of times each word appears in the text. The text is already lemmatized which will return words that have been reduce to
+#their base form.
+#The function will also reduce all words to lowercase in order to bypass the case sensitivity of the function.
+#The function will detect if words have already been counted, and if so, will add it to the running tally. If the word has not yet been detected, it will
+#create a new entry.
+#The return statement will give us the total for each word that appears in the text.
+def word_count(word_list):
+    word_counts = {}
+    for word in word_list:
+      word = word.lower()
+      if word in word_counts:
+        word_counts[word] += 1
+      else:
+        word_counts[word] = 1
+    return word_counts
+
+#This function will print a list of the top 15 most frequently detected words in the text.
+#The function will sort through the word counts that have already been tallied and will organize them in order of frequency.
+#The function will display the word, and the number of times it appears in the text.
+#It utilizes existing functions to retrieve word counts.
+def print_top_15_frequent_words(word_counts):
+    sorted_word_counts = dict(sorted(word_counts.items(), key=operator.itemgetter(1), reverse=True))
+    top_15_words = list(sorted_word_counts.items())[:15]  # Get the top 15 words and counts
+    for word, count in top_15_words:
+        print(f"{word}: {count}")
+
+
+doc_tokenized = word_tokenization_normalization(pride_prejudice_text)
+
+print(doc_tokenized)
+
+new_counts = word_count(doc_tokenized)
+print(new_counts)
+
+print_top_15_frequent_words(new_counts)
+
+"""
+Using the basic get_word_counts function, the most frequently used words in the text are "the, "of", "you", "to", "a", "i", "and", "not", "that", and "mr.".
+However, when using the word_tokenization_normalization function, the most common words are "bennet", "know", "say", "bingley", "visit", "dear", "mrs", "wife", "girl",
+"man", and "good". The difference in these two lists is that the second list excludes words such as "the" and "of", which are commonly used words that do not
+provide much information about the text. Since the second list does not feature these words, it is a more useful tool when analysing the text. It provides a more
+meaningful analysis of the words used in the text, as it features names and words that are more specific to the text. Based on the second list, we can infer
+about the main characters, and how they interact with each other. For example, since the words "mr." and "mrs" are present, we can guess that the characters
+treat each other with a level of respect. Since we removed unimportant words, we can get a clearer picture of the themes and topics that are potentially
+present in the text provided.
+"""
+</code></pre>
+
+<section>
+    <h2>My Findings</h2>
+    <p>I found that the most frequently used words in the text are "bennet", "know", "say", "bingley", "visit", "dear", "mrs", "wife", "girl". I believe that this gives us an idea of who the characters in the story are, and how they interact with each other.</p>
+</section>
